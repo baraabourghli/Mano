@@ -1,0 +1,113 @@
+org 100
+//c=a+b 32-bit
+lda al
+add bl
+sta cl
+lda ah
+add bh
+sta ch
+hlt
+//c=a+b 64-bit
+org 120
+lda a1
+add b1
+sta c1
+lda a2
+add b2
+sta c2
+lda a3
+add b3
+sta c3
+lda a4
+add b4
+sta c4
+hlt
+//c=a-b
+org 140
+lda bl
+cma
+inc
+add al
+sta cl
+lda bh
+cma
+inc
+add bh
+sta ch
+hlt
+//b1=a-b+a1
+org 160
+lda bl
+cma
+inc
+add al
+add a1
+sta b1
+lda bh
+cma
+inc
+add ah
+add a2
+sta b2
+hlt
+//a=b*2
+org 180
+lda b1
+cil
+cil
+sta a1
+hlt
+//a=b*4
+org 200
+lda b1
+cil
+cil
+cil
+cil
+sta a1
+hlt
+//a=b/2
+org 220
+lda b1
+cir
+cir
+sta a1
+hlt
+//a=b/4
+org 240
+lda b1
+cir
+cir
+cir
+cir
+sta a1
+hlt
+//a1=(a-b)/2
+org 260
+lda bl
+cma
+inc
+add al
+cir
+cir
+sta a1
+hlt
+a1,dec 0
+a2,dec 0
+a3,dec 0
+a4,dec 0
+b1,dec 0
+b2,dec 0
+b3,dec 0
+b4,dec 0
+c1,dec 0
+c2,dec 0
+c3,dec 0
+c4,dec 0
+
+al,dec 0
+ah,dec 0
+bl,dec 0
+bh,dec 0
+cl,dec 0
+ch,dec 0

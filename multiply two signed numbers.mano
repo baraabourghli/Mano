@@ -1,0 +1,53 @@
+	ORG 100	 / Data Segment
+A,	DEC 9	/ Multiplicand
+B,	DEC -2	/ Multiplier
+P,	HEX 0	/ Product
+CTR,DEC -8	/ Counter
+SIN,HEX 0	/ The sign flag	
+	ORG 200	/ Code Segment
+	CLE	/ Clear the sign flag (assume initially that the sign of the product is positive)
+		/ test the sign of the multiplicand, if it is negative convert it to positive and complement E (the sign flag)
+	LDA A	/ Load the multiplicand to the accumulator
+	SNA	/ Skip the next instruction if the multiplicand is negative
+	BUN APO
+	CMA
+	INC
+	CME	/ Complement the sign flag
+	STA A
+/ test the sign of the multiplier, if it is negative convert it to positive and complement E (the sign flag)
+APO,LDA B
+	SNA	/ Skip the next instruction if the multiplier is negative
+	BUN BPO
+	CMA
+	INC
+	CME	/ Complement the sign flag
+	STA B
+BPO,CIR	/ Save the sign flag
+	STA SIN
+/ Now multiply the two numbers
+LOP,LDA B	/ Load the multiplier
+	CIR	/ circulate right. The LSB of the multiplier will go into E
+	STA B
+	SZE	/ Skip next instruct. if E is zero
+	BUN ONE
+	BUN ZRO
+ONE,LDA A
+	ADD P
+	STA P
+ZRO,CLE
+	LDA A
+	CIL
+	STA A
+	ISZ CTR
+	BUN  LOP
+/ Adjust the sign of the product
+	LDA SIN
+	CIL	/ The sign bit (flag) is now in E
+	SZE
+	BUN NEG
+	BUN DON
+NEG,LDA P
+	CMA
+	INC
+	STA P
+DON,	HLT

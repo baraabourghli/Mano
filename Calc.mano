@@ -1,0 +1,169 @@
+// A basic calculator operating on ManoComputer
+// It supports the following operators:
+// + : To add two hex numbers and output the result
+// - : To subtract two hex numbers and output the result
+// = : To calculate the previeus operation and start
+//		a new one
+// Q : Quit
+//
+// Example:
+// Input Stream: 2A + 0B3 - 5E + 11 = Q
+// 
+// Note: Output stream should be reversed
+
+CHI,	SKI
+		BUN CHI
+		CLA
+		INP
+		STA TMP
+		BUN TMP I	// Operator should have a label
+			
+				
+// Temp and masks
+TMP,	HEX 0		// Temp1
+TM2,	HEX 0		// Temp2
+RIN,	HEX FFD0	// Numbers reindexer
+MSK,	HEX FFF0
+OF4,	HEX 000F	// Keep only the first 4 bits
+LIN,	DEC	-7		// Letters reindexer
+NOD,	DEC -4		// For looping
+S10,	DEC -10		// Subtract 10
+LTI,	HEX 0041
+
+// The three main variables
+RLT,	HEX 0
+OPT,	BUN AOP		// Initially set to assign (=)
+OPD,	HEX 0		// Initially set to zero
+
+		// Space
+		ORG 0020
+		BUN CHI			// Space -> Discard
+
+		// Operators
+		ORG 002B	// +
+		LDA PLS
+		BUN COO		
+		ORG 002D
+		LDA SUB		// -
+		BUN COO
+		ORG 003D
+		LDA ASN		// =
+		BUN COO
+
+		// Numbers
+		ORG 0030
+		BUN IND		// 0
+		BUN IND		// 1
+		BUN IND		// 2
+		BUN IND		// 3
+		BUN IND		// 4
+		BUN IND		// 5
+		BUN IND		// 6
+		BUN IND		// 7
+		BUN IND		// 8
+		BUN IND		// 9
+		
+		// Letters
+		ORG 0041
+		BUN INL		// A
+		BUN INL		// B
+		BUN INL		// C
+		BUN INL		// D
+		BUN INL		// E
+		BUN INL		// F
+		
+		ORG 0051
+		HLT			// Q
+		
+		// Subroutines
+IND,	ADD RIN		// Get a number from 0->15 
+		CMA
+		STA TMP
+		LDA OPD
+		CIL			// Discard the first 4-bits
+		CIL
+		CIL
+		CIL
+		AND MSK		// Clear the first 4-bits
+		CMA
+		AND TMP
+		CMA			// OR operation
+		STA OPD		// Update operand
+		BUN CHI		// Wait for another input
+		
+INL,	ADD LIN		// Input a letter
+		BUN IND
+		
+PLS,	BUN POP
+POP, 	LDA RLT		// Result += Operand
+		ADD OPD
+		STA RLT
+		CLA
+		STA OPD		// Clear operand
+		BUN OPE
+		
+SUB,	BUN SOP
+SOP,	LDA OPD		// Result -= Operand
+		CMA
+		INC
+		STA OPD
+		LDA RLT
+		ADD OPD
+		STA RLT
+		CLA
+		STA OPD		// Clear operand
+		BUN OPE
+
+ASN,	BUN AOP
+AOP,	LDA OPD		// Result = Operand
+		STA RLT
+		CLA
+		STA OPD		// Clear operand
+		BUN OPE
+		
+COO,	STA TMP		// Calc old operation
+		BUN OPT
+		
+OPE,	LDA TMP		// Operator End
+		STA OPT
+		BSA COR		// Output result
+		BUN CHI
+
+// Output issues
+COR,	HEX 0		// Clear and output result
+		CLA
+		BSA SOT		// Clears the output
+		// Prepare for loop
+		LDA NOD
+		STA TMP
+		LDA RLT
+		STA TM2
+		
+LOP,	AND OF4		// Now we have a number in AC from 0 -> 15
+		ADD S10		// Subtract 9 -> AC is in [-10, 5]
+		SPA
+		ADD LIN		// If it's a number -> AC is in [-17,-8]
+		ADD LTI		// Finally the digit ASCII code
+		BSA SOT		// Output it
+		
+		BSA SR4		// Prepare for the next digit
+		ISZ TMP
+		BUN LOP		// Repeat loop
+		
+		BUN COR I	// Return
+
+SOT,	HEX 0		// Save output
+COF,	SKO
+		BUN COF
+		OUT
+		BUN SOT I
+		
+SR4,	HEX 0		// Shift "Result" 4 bits to the right and load it in AC
+		LDA TM2
+		CLE
+		CIR
+		CIR
+		CIR
+		CIR
+		STA TM2
+		BUN SR4 I
